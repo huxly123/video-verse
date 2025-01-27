@@ -1,101 +1,143 @@
-import Image from "next/image";
+"use client";
+import Button from "@/components/Button";
+import OptionSelect from "@/components/OptionSelect";
+import PreviewSection from "@/components/PreviewSection";
+import Tabs from "@/components/Tabs";
+import CustomVideoPlayer from "@/components/Video";
+import {
+  aspectRatioOptionsData,
+  playBackOptionsData,
+  tabsData,
+} from "@/utils/constants";
+import { useRef, useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [playBackSpeed, setPlayBackSpeed] = useState(1);
+  const [aspectRatio, setAspectRatio] = useState("1:1");
+  const [activeTab, setActiveTab] = useState(1);
+  const [showCropper, setShowCropper] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [previewData, setPreviewData] = useState<
+    {
+      timeStamp: number;
+      coordinates: number[];
+      volume: number;
+      playbackRate: number;
+    }[]
+  >([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleStartCropper = () => {
+    setShowCropper(true);
+  };
+
+  const handleRemoveCropper = () => {
+    setShowCropper(false);
+    setPreviewData([]);
+  };
+
+  const downloadFile = () => {
+    const jsonString = JSON.stringify(previewData, null, 2); // Convert data to JSON
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "data.json"; // File name
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url); // Clean up the URL object
+  };
+
+  const handleGeneratePreview = () => {
+    downloadFile();
+    setShowCropper(false);
+    setPreviewData([]);
+  };
+
+  return (
+    <div className="bg-black w-[100vw] h-[100vh] flex justify-center items-center">
+      <div className="w-[1082px] h-[688px] bg-[#37393F] rounded-[10px] px-5 py-6 flex flex-col justify-between">
+        <div>
+          <div className="w-full flex justify-between mb-6">
+            <p className="text-white text-base font-bold leading-5">Cropper</p>
+            <Tabs
+              data={tabsData}
+              onChange={(key) => {
+                setActiveTab(key);
+              }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <div />
+          </div>
+          <div className="w-full flex">
+            {/* Left Section */}
+            <div className="w-[50%]">
+              <CustomVideoPlayer
+                playBackSpeed={playBackSpeed}
+                showCropper={showCropper}
+                aspectRatio={aspectRatio}
+                ref={canvasRef}
+                setPreviewData={setPreviewData}
+              />
+              <div className="mt-4 flex gap-2">
+                <OptionSelect
+                  data={playBackOptionsData}
+                  title="Playback Speed"
+                  onChange={(val) => {
+                    setPlayBackSpeed(val as number);
+                  }}
+                  defaultActiveEle={playBackOptionsData?.[3]}
+                />
+                <OptionSelect
+                  data={aspectRatioOptionsData}
+                  title="Cropper Aspect Ratio"
+                  onChange={(val) => {
+                    setAspectRatio(val as string);
+                  }}
+                  defaultActiveEle={aspectRatioOptionsData?.[4]}
+                />
+              </div>
+            </div>
+            {/* Right Section */}
+            {showCropper ? (
+              <div className="inset-0 flex items-center justify-center">
+                <canvas
+                  ref={canvasRef}
+                  className="object-cover rounded-lg shadow-md"
+                />
+              </div>
+            ) : (
+              <PreviewSection />
+            )}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div>
+          <div className="w-full h-[1px] bg-[#494C55]" />
+          <div className="flex justify-between items-center mt-5">
+            <div className="flex items-center gap-2">
+              <Button
+                label="Start Cropper"
+                isDisabled={showCropper}
+                onClick={handleStartCropper}
+              />
+              <Button
+                label="Remove Cropper"
+                isDisabled={!showCropper}
+                onClick={handleRemoveCropper}
+              />
+              <Button
+                label="Generate Preview"
+                isDisabled={!(showCropper && previewData.length > 0)}
+                onClick={handleGeneratePreview}
+              />
+            </div>
+            <div className="w-[87px] h-9 flex justify-center items-center bg-[#45474E] rounded-[10px] cursor-pointer">
+              <p className="text-white font-medium text-sm">Cancel</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

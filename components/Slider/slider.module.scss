@@ -1,0 +1,34 @@
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #FFFFFF3B;
+
+  border-radius: 32px;
+  outline: none;
+  border: none;
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
+
+  }
+
+  &::-moz-range-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
+  }
+
+  background-image: linear-gradient(#FFFF, #FFFF);
+
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
