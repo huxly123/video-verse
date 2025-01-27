@@ -154,16 +154,16 @@ const CustomVideoPlayer = forwardRef<HTMLCanvasElement, ICustomVideoPlayer>(
     };
 
     const drawVideoPreview = useCallback(() => {
-      if (videoRef.current && showCropper && ref?.current) {
-        const context = ref.current.getContext("2d");
+      if (videoRef.current && showCropper && (ref as any)?.current) {
+        const context = (ref as any).current.getContext("2d");
         if (context) {
           // Set the canvas dimensions to match the cropper's width
           const cropperWidth2 = getDimensionsfromRatio(
             aspectRatio,
             videoRef.current.videoHeight
           ); // width of the cropper based on aspect ratio
-          ref.current.width = cropperWidth;
-          ref.current.height = videoRef.current.offsetHeight; // Use the desired height for the preview
+          (ref as any).current.width = cropperWidth;
+          (ref as any).current.height = videoRef.current.offsetHeight; // Use the desired height for the preview
 
           // Get the position and dimensions of the draggable cropper
           const cropperX = position.x; // X position of the cropper
